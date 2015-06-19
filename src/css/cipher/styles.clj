@@ -95,10 +95,17 @@
                     :text-overflow :ellipsis
                     :font-size (pt 11)}]
       [:div.text {:padding-left (px 120)
+                  :padding-right (px 110)
                   :padding-top (px 4)
                   :font-weight 100
                   :color :peru
-                  :font-size (pt 14)}]]]]])
+                  :font-size (pt 14)}]
+      [:div.date {:position :absolute
+                  :top (px 2)
+                  :right (px 5)
+                  :font-size (pt 9)
+                  :font-weight 100
+                  :color :#777}]]]]])
 
 (def sender
   [[:section#sender {:position :fixed

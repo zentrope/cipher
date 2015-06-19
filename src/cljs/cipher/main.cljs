@@ -6,12 +6,14 @@
    [clojure.string :as s]
    [cipher.socket :as socket]
    [om.core :as om :include-macros true]
-   [sablono.core :as html :refer-macros [html]]))
+   [sablono.core :as html :refer-macros [html]]
+   [goog.date.relative :as rel]))
 
 (enable-console-print!)
 
 ;;-----------------------------------------------------------------------------
 ;; Utils
+;;-----------------------------------------------------------------------------
 
 (defn pchan
   [f ch]
@@ -23,8 +25,13 @@
           (async/put! ch [:system/err {:value v :exception e}])))
       (recur))))
 
+(defn datef
+  [ts]
+  (rel/format ts))
+
 ;;-----------------------------------------------------------------------------
 ;; State management
+;;-----------------------------------------------------------------------------
 
 (def MAX_BUFFER 100)
 
@@ -95,12 +102,13 @@
 ;;-----------------------------------------------------------------------------
 
 (defn message-component
-  [{:keys [handle message] :as data} owner]
+  [{:keys [handle message ts] :as data} owner]
   (om/component
    (html
     [:div.message
      [:div.handle handle]
-     [:div.text message]])))
+     [:div.text message]
+     [:div.date (datef ts)]])))
 
 (defn message-log-component
   [data owner]
