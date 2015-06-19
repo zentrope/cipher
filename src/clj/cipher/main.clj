@@ -50,9 +50,9 @@
 
 (defn conn-watch
   [k r o n]
-  (log/info "WATCH: (" (count n) "): "
-            (reduce-kv (fn [a k v]
-                         (conj a (str "stream/" v))) [] n)))
+  (log/debug "WATCH: (" (count n) "): "
+             (reduce-kv (fn [a k v]
+                          (conj a (str "stream/" v))) [] n)))
 
 ;;-----------------------------------------------------------------------------
 ;; Server protocol
@@ -132,14 +132,13 @@
   (let [auth-token (:sec-websocket-protocol headers)
         headers {:headers {"sec-websocket-protocol" auth-token}}
         stream @(http/websocket-connection req headers)]
-    (log/info "connected:" auth-token)
-    (async/go (log/info "client connect")
+    (async/go (log/info "client connected")
               (add-stream! stream auth-token)
               (send-anon! stream)
               (catch-up! stream)
               (loop []
                 (when-let [msg @(stream/take! stream)]
-                  (log/info "recv>" msg)
+                  (log/debug "recv>" msg)
                   (on-msg! stream (edn/read-string msg))
                   (recur)))
               (log/info "client disconnected")
