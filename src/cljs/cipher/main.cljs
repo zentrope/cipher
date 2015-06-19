@@ -76,9 +76,13 @@
   (let [ch (om/get-shared owner :ch)]
     (async/put! ch msg)))
 
+(defn by-id
+  [el-id]
+  (.getElementById js/document el-id))
+
 (defn focus!
   [el-id]
-  (when-let [el (.getElementById js/document el-id)]
+  (when-let [el (by-id el-id)]
     (.focus el)))
 
 (defn value!
@@ -97,26 +101,42 @@
       (om/set-state! owner kw "")
       (.stopPropagation e))))
 
+(defn sync-down!
+  [el-id]
+  (when-let [el (by-id el-id)]
+    (.scrollIntoView el false)
+    (println "id to scroll" el-id)
+;;    (set! (.-scrollTop el) 100000000)
+    ))
+
 ;;-----------------------------------------------------------------------------
 ;; Components
 ;;-----------------------------------------------------------------------------
 
 (defn message-component
-  [{:keys [handle message ts] :as data} owner]
+  [{:keys [id handle message ts] :as data} owner]
   (om/component
    (html
-    [:div.message
+    [:div.message {:id (str id)}
      [:div.handle handle]
      [:div.text message]
      [:div.date (datef ts)]])))
 
 (defn message-log-component
   [data owner]
-  (om/component
-   (html
-    [:section#messages {:className (when-not (:handle name) "cover")}
-     [:div.message-list
-      (om/build-all message-component (:queue data) {:key :id})]])))
+  (reify
+    om/IDidMount
+    (did-mount [_]
+      (sync-down! "ml"))
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (sync-down! "ml"))
+    om/IRender
+    (render [_]
+      (html
+       [:section#messages {:className (when (:edit? data) "cover")}
+        [:div#ml.message-list
+         (om/build-all message-component (:queue data) {:key :id})]]))))
 
 (defn gather-name-component
   [data owner]

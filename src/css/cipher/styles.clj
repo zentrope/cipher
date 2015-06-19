@@ -7,7 +7,8 @@
   [[:body
     {:font-family ["helvetica", "sans-serif"]
      :font-weight 200
-     :background-color :#ccc
+     :overflow :hidden
+     :background-color :#303e4d
      :padding 0
      :margin 0}]
    [:*
@@ -78,12 +79,11 @@
                        :left 0
                        :right 0
                        :background-color :#202a33
-                       :padding (px 20)}
+                       :padding-left (px 20)
+                       :padding-right (px 20)}
     [:&.cover {:bottom (px 30)}]
-    [:div.message-list {:margin-top (px 10)
-                        :margin-bottom (px 50)}
-     [:div.message {:position :relative
-                    :margin-bottom (px 10)}
+    [:div.message-list {:padding-bottom (px 4)}
+     [:div.message {:position :relative :margin-bottom (px 10)}
       [:div.handle {:position :absolute
                     :top (px 7)
                     :font-weight 100
