@@ -149,7 +149,8 @@
                 :right (px 15)
                 :text-align :center
                 :margin 0
-                :color :royalblue
+                :color :#777
+                :letter-spacing (px 1)
                 :font-weight 400
                 :font-size (pt 8)}]
     [:div.signout {:position :absolute

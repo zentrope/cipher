@@ -95,6 +95,11 @@
 
 (defn submit-on-cr!
   [e owner kw topic]
+  (when (= (.-keyCode e) 27)
+    (when-let [orig (om/get-state owner :original)]
+      (om/set-state! owner kw orig)
+      (deliver! owner [topic orig])
+      (.stopPropagation e)))
   (when (= (.-keyCode e) 13)
     (let [msg (om/get-state owner kw)]
       (deliver! owner [topic msg])
@@ -104,10 +109,7 @@
 (defn sync-down!
   [el-id]
   (when-let [el (by-id el-id)]
-    (.scrollIntoView el false)
-    (println "id to scroll" el-id)
-;;    (set! (.-scrollTop el) 100000000)
-    ))
+    (.scrollIntoView el false)))
 
 ;;-----------------------------------------------------------------------------
 ;; Components
@@ -144,7 +146,9 @@
 
     om/IInitState
     (init-state [_]
-      {:handle (first (s/split (:handle data) "-"))})
+      (let [original (first (s/split (:handle data) "-"))]
+        {:handle original
+         :original original}))
 
     om/IDidMount
     (did-mount [_]
@@ -158,6 +162,7 @@
                 :type "text"
                 :value handle
                 :maxLength 20
+                :autoComplete "off"
                 :placeholder "Who do you want to be?"
                 :onKeyDown #(submit-on-cr! % owner :handle :client/handle)
                 :onChange #(update! % owner :handle)}]))))
@@ -195,6 +200,7 @@
                     :id "typer"
                     :value message
                     :maxLength 512
+                    :autoComplete "off"
                     :placeholder "Type your message here"
                     :onKeyDown #(submit-on-cr! % owner :message :client/message)
                     :onChange #(update! % owner :message)}]])]))))
@@ -204,7 +210,7 @@
   (om/component
    (html
     [:section#status
-     [:div.copy "(c) 2015 Zentrope LLC"]])))
+     [:div.copy "Copyright \u00a9 2015 Zentrope LLC. All rights reserved."]])))
 
 (defn root-component
   [data owner]
