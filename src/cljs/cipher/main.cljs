@@ -129,6 +129,7 @@
                 :id "widget"
                 :type "text"
                 :value handle
+                :maxLength 20
                 :placeholder "Who do you want to be?"
                 :onKeyDown #(submit-on-cr! % owner :handle :client/handle)
                 :onChange #(update! % owner :handle)}]))))
@@ -165,6 +166,7 @@
            [:input {:type "text"
                     :id "typer"
                     :value message
+                    :maxLength 512
                     :placeholder "Type your message here"
                     :onKeyDown #(submit-on-cr! % owner :message :client/message)
                     :onChange #(update! % owner :message)}]])]))))

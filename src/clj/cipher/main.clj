@@ -5,6 +5,7 @@
    [clojure.edn :as edn]
    [clojure.java.io :as io]
    [clojure.tools.logging :as log]
+   [clojure.string :as s]
    [manifold.deferred :as d]
    [manifold.stream :as stream]
    [zentrope.lib.routes :as routes])
@@ -47,6 +48,13 @@
 (defn mk-msg
   [handle text]
   [:server/message {:id (gensym "id") :handle handle :message text :ts (now)}])
+
+(defn trim-to
+  [s size]
+  (let [s (s/trim (or s ""))]
+    (if (<= (count s) size)
+      s
+      (subs s size))))
 
 (defn conn-watch
   [k r o n]
@@ -97,7 +105,9 @@
 
 (defmethod on-msg! :client/new-name
   [stream [topic data :as msg]]
-  (swap! conns assoc stream data))
+  (let [[root id] (s/split data #"-" 2)
+        handle (str (trim-to root 20) "-" (trim-to id 40))]
+    (swap! conns assoc stream handle)))
 
 (defmethod on-msg! :client/withdraw
   [stream [topic data :as msg]]
@@ -106,10 +116,12 @@
 (defmethod on-msg! :client/message
   [stream [topic data :as msg]]
   (let [h (get @conns stream)
-        msg (mk-msg h data)]
-    (swap! history #(conj-max % msg MAX_HISTORY))
-    (doseq [[s _] @conns]
-      (stream/put! s (pr-str msg)))))
+        text (trim-to data 512)
+        msg (mk-msg h text)]
+    (when-not (s/blank? text)
+      (swap! history #(conj-max % msg MAX_HISTORY))
+      (doseq [[s _] @conns]
+        (stream/put! s (pr-str msg))))))
 
 ;;-----------------------------------------------------------------------------
 ;; Route handlers
