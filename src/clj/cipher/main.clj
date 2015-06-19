@@ -33,7 +33,7 @@
 
 (defn- uuid
   []
-  (str (java.util.UUID/randomUUID)))
+  (str "anon-" (java.util.UUID/randomUUID)))
 
 (defn- now
   []
@@ -77,6 +77,10 @@
   [stream]
   (doseq [msg @history]
     (stream/put! stream (pr-str msg))))
+
+(defn send-anon!
+  [stream]
+  @(stream/put! stream (pr-str [:server/token (uuid)])))
 
 ;; API
 ;; [:client/new-name "string"
@@ -131,6 +135,7 @@
     (log/info "connected:" auth-token)
     (async/go (log/info "client connect")
               (add-stream! stream auth-token)
+              (send-anon! stream)
               (catch-up! stream)
               (loop []
                 (when-let [msg @(stream/take! stream)]
