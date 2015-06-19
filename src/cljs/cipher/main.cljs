@@ -35,15 +35,30 @@
   [state event-ch socket [topic data :as msg]]
   (println "recv>" (pr-str msg))
   (case topic
-    :client/handle (do (om/update! state :handle data)
-                       (socket/send! socket [:client/new-name data]))
-    :client/leave  (do (om/update! state :handle nil)
-                       (socket/send! socket [:client/withdraw]))
-    :client/message (let [handle (:handle @state)]
-                      (socket/send! socket [:client/message data]))
-    :socket/open (if-let [handle (:handle @state)]
-                   (socket/send! socket [:client/new-name handle])
-                   (async/put! event-ch [:client/new-name (str (random-uuid))]))
+
+    :client/handle
+    (do (println "token is: " (:token @state))
+        (let [handle (s/replace (:token @state) "anon" data)]
+          (om/update! state :handle handle)
+          (socket/send! socket [:client/new-name handle])))
+
+    :client/leave
+    (do (om/update! state :handle nil)
+        (socket/send! socket [:client/withdraw]))
+
+    :client/message
+    (let [handle (:handle @state)]
+      (socket/send! socket [:client/message data]))
+
+    :socket/open
+    (if-let [handle (:handle @state)]
+      (socket/send! socket [:client/new-name handle])
+      (async/put! event-ch [:client/new-name (str (random-uuid))]))
+
+    :server/token
+    (om/transact! state #(cond-> %
+                           (nil? (:handle %)) (assoc :handle data)
+                           true (assoc :token data)))
 
     :server/message
     (om/transact! state :queue #(conj-max % data MAX_BUFFER))
@@ -94,7 +109,6 @@
   (om/component
    (html
     [:section#messages {:className (when-not (:handle name) "cover")}
-     ;;[:h2 "message log"]
      [:div.message-list
       (om/build-all message-component (:queue data) {:key :id})]])))
 
@@ -128,7 +142,7 @@
     [:section#title
      [:div.title "Cipher Chat"]
      (if-let [handle (:handle data)]
-       [:div.handle handle]
+       [:div.handle (first (s/split handle "-"))]
        [:div.gather (om/build gather-name-component data)])])))
 
 (defn type-message-component

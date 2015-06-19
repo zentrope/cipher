@@ -33,7 +33,7 @@
 
 (defn- uuid
   []
-  (str "anon-" (java.util.UUID/randomUUID)))
+  (str (gensym "anon-")))
 
 (defn- now
   []
@@ -79,8 +79,8 @@
     (stream/put! stream (pr-str msg))))
 
 (defn send-anon!
-  [stream]
-  @(stream/put! stream (pr-str [:server/token (uuid)])))
+  [stream token]
+  @(stream/put! stream (pr-str [:server/token token])))
 
 ;; API
 ;; [:client/new-name "string"
@@ -133,8 +133,9 @@
         headers {:headers {"sec-websocket-protocol" auth-token}}
         stream @(http/websocket-connection req headers)]
     (async/go (log/info "client connected")
-              (add-stream! stream auth-token)
-              (send-anon! stream)
+              (let [token (uuid)]
+                (add-stream! stream token)
+                (send-anon! stream token))
               (catch-up! stream)
               (loop []
                 (when-let [msg @(stream/take! stream)]
