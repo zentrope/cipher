@@ -11,6 +11,7 @@
 (enable-console-print!)
 
 ;;-----------------------------------------------------------------------------
+;; Utils
 
 (defn pchan
   [f ch]
@@ -23,6 +24,7 @@
       (recur))))
 
 ;;-----------------------------------------------------------------------------
+;; State management
 
 (def MAX_BUFFER 100)
 
@@ -37,23 +39,16 @@
   (case topic
 
     :client/handle
-    (do (println "token is: " (:token @state))
-        (let [handle (s/replace (:token @state) "anon" data)]
-          (om/update! state :handle handle)
-          (socket/send! socket [:client/new-name handle])))
+    (let [handle (s/replace (:token @state) "anon" data)]
+      (om/transact! state #(assoc % :handle handle :edit? false))
+      (socket/send! socket [:client/new-name handle]))
 
-    :client/leave
-    (do (om/update! state :handle nil)
-        (socket/send! socket [:client/withdraw]))
+    :client/edit
+    (om/update! state :edit? true)
 
     :client/message
     (let [handle (:handle @state)]
       (socket/send! socket [:client/message data]))
-
-    :socket/open
-    (if-let [handle (:handle @state)]
-      (socket/send! socket [:client/new-name handle])
-      (async/put! event-ch [:client/new-name (str (random-uuid))]))
 
     :server/token
     (om/transact! state #(cond-> %
@@ -62,10 +57,12 @@
 
     :server/message
     (om/transact! state :queue #(conj-max % data MAX_BUFFER))
+
     nil))
 
 ;;-----------------------------------------------------------------------------
 ;; Component utilities
+;;-----------------------------------------------------------------------------
 
 (defn deliver!
   [owner msg]
@@ -95,6 +92,7 @@
 
 ;;-----------------------------------------------------------------------------
 ;; Components
+;;-----------------------------------------------------------------------------
 
 (defn message-component
   [{:keys [handle message] :as data} owner]
@@ -118,7 +116,7 @@
 
     om/IInitState
     (init-state [_]
-      {:handle ""})
+      {:handle (first (s/split (:handle data) "-"))})
 
     om/IDidMount
     (did-mount [_]
@@ -141,8 +139,10 @@
    (html
     [:section#title
      [:div.title "Cipher Chat"]
-     (if-let [handle (:handle data)]
-       [:div.handle (first (s/split handle "-"))]
+     (if-not (:edit? data)
+       [:div.handle
+        {:onClick #(deliver! owner [:client/edit])}
+        (first (s/split (:handle data) "-"))]
        [:div.gather (om/build gather-name-component data)])])))
 
 (defn type-message-component
@@ -160,7 +160,7 @@
     (render-state [_ {:keys [message]}]
       (html
        [:section#sender
-        (when-not (s/blank? (:handle data))
+        (when-not (:edit? data)
           [:div.typer
            [:input {:type "text"
                     :id "typer"
@@ -174,11 +174,7 @@
   (om/component
    (html
     [:section#status
-     [:div.copy "(c) 2015 Zentrope LLC"]
-     (when-not (nil? (:handle data))
-       [:div.signout
-        [:button {:onClick #(do (deliver! owner [:client/leave nil])
-                                (.stopPropagation %))} "LEAVE"]])])))
+     [:div.copy "(c) 2015 Zentrope LLC"]])))
 
 (defn root-component
   [data owner]
@@ -186,17 +182,22 @@
    (html
     [:section#root
      (om/build title-bar-component data)
-     (when (s/blank? (:handle data))
+     (when (:edit? data)
        (om/build gather-name-component data))
      (om/build message-log-component data)
      (om/build type-message-component data)
      (om/build status-bar-component data)])))
 
 ;;-----------------------------------------------------------------------------
+;; State
+;;-----------------------------------------------------------------------------
 
 (defonce state
-  (atom {:handle nil
-         :queue []}))
+  (atom (let [token (str (gensym "anon-"))]
+          {:edit? false
+           :handle token
+           :token token
+           :queue []})))
 
 (defonce event-ch
   (async/chan))
@@ -204,6 +205,8 @@
 (defonce socket
   (socket/socket! "/ws" event-ch "cipher"))
 
+;;-----------------------------------------------------------------------------
+;; Bootstrap
 ;;-----------------------------------------------------------------------------
 
 (defn mount-root

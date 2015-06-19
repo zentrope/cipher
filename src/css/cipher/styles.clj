@@ -29,7 +29,7 @@
     [:div.title {:position :absolute
                  :bottom (px 3)
                  :left (px 15)
-                 :color :lime
+                 :color :#aaa
                  :letter-spacing (pt 1)
                  :font-size (pt 18)
                  :font-weight 100}]
@@ -39,14 +39,15 @@
                   :bottom (px 3)
                   :right (px 0)
                   :text-align :right
-                  :color :dodgerblue
+                  :color :lime
                   :letter-spacing (pt 1)
                   :font-size (pt 18)
                   :width (px 300)
                   :overflow :hidden
                   :text-overflow :ellipsis
                   :white-space :nowrap
-                  :font-weight 100}]
+                  :font-weight 100
+                  :cursor :pointer}]
     [:div.gather {:position :absolute
                   :right 0
                   :top 0
@@ -58,7 +59,7 @@
               :border :none
               :padding 0
               :margin 0
-              :color :dodgerblue
+              :color :lime
               :background-color :#222
               :letter-spacing (pt 1)
               :padding-left (px 18)
@@ -120,7 +121,7 @@
               :outline :none
               :background-color :#111
               :font-weight 200
-              :color :dodgerblue
+              :color :lime
               :padding-left (px 20)
               :margin 0
               :letter-spacing (pt 1)
