@@ -35,19 +35,35 @@
   []
   (str (java.util.UUID/randomUUID)))
 
+(defn- now
+  []
+  (System/currentTimeMillis))
+
+(defn conj-max
+  [data value max-size]
+  (let [v (conj data value)]
+    (->> (reverse v) (take max-size) reverse vec)))
+
+(defn mk-msg
+  [handle text]
+  [:server/message {:id (gensym "id") :handle handle :message text :ts (now)}])
+
+(defn conn-watch
+  [k r o n]
+  (log/info "WATCH: (" (count n) "): "
+            (reduce-kv (fn [a k v]
+                         (conj a (str "stream/" v))) [] n)))
+
 ;;-----------------------------------------------------------------------------
 ;; Server protocol
 ;;-----------------------------------------------------------------------------
 
+(def MAX_HISTORY 20)
+
+(def history (atom []))
 (def conns (atom {}))
 
-(add-watch conns :debug (fn [k r o n]
-                          (log/info "WATCH: "
-                                    (reduce-kv (fn [a k v]
-                                                 (conj a (str "stream/" v))) [] n))))
-
-(add-watch conns :count (fn [k r o n]
-                          (log/info "WATCH:" (count n))))
+(add-watch conns :debug conn-watch)
 
 (defn add-stream!
   [stream name]
@@ -56,6 +72,11 @@
 (defn del-stream!
   [stream]
   (swap! conns dissoc stream))
+
+(defn catch-up!
+  [stream]
+  (doseq [msg @history]
+    (stream/put! stream (pr-str msg))))
 
 ;; API
 ;; [:client/new-name "string"
@@ -80,11 +101,11 @@
 
 (defmethod on-msg! :client/message
   [stream [topic data :as msg]]
-  (let [h (get @conns stream)]
+  (let [h (get @conns stream)
+        msg (mk-msg h data)]
+    (swap! history #(conj-max % msg MAX_HISTORY))
     (doseq [[s _] @conns]
-      (stream/put! s (pr-str [:server/message {:id (gensym "id")
-                                               :handle h
-                                               :message data}])))))
+      (stream/put! s (pr-str msg)))))
 
 ;;-----------------------------------------------------------------------------
 ;; Route handlers
@@ -110,6 +131,7 @@
     (log/info "connected:" auth-token)
     (async/go (log/info "client connect")
               (add-stream! stream auth-token)
+              (catch-up! stream)
               (loop []
                 (when-let [msg @(stream/take! stream)]
                   (log/info "recv>" msg)
