@@ -5,9 +5,9 @@
 
 (def globals
   [[:body
-    {:font-family "helvetica, sans-serif"
+    {:font-family ["helvetica", "sans-serif"]
      :font-weight 200
-     :background-color :pink
+     :background-color :#ccc
      :padding 0
      :margin 0}]
    [:*
@@ -24,9 +24,7 @@
 (def title-bar
   [[:section#title {:position :fixed
                     :top 0 :left 0 :right 0 :height (px 40)
-                    ;;:background-color :white
                     :background-color :#303e4d
-
                     :border-bottom [[(px 1) :solid :black]]}
     [:div.title {:position :absolute
                  :bottom (px 3)
@@ -36,26 +34,24 @@
                  :font-size (pt 18)
                  :font-weight 100}]
     [:div.handle {:position :absolute
-                  :top (px 0)
-                  :padding-top (px 8)
+                  :padding 0
                   :padding-right (px 15)
-                  :bottom (px 0)
+                  :bottom (px 3)
                   :right (px 0)
                   :text-align :right
                   :color :dodgerblue
                   :letter-spacing (pt 1)
                   :font-size (pt 18)
                   :width (px 300)
-                  :padding 0
-                  :height (px 40)
+                  :overflow :hidden
+                  :text-overflow :ellipsis
+                  :white-space :nowrap
                   :font-weight 100}]
     [:div.gather {:position :absolute
                   :right 0
                   :top 0
                   :bottom 0
-                  :width (px 300)
-  ;;                :border-left [[(px 1) :solid :#d8d8d8]]
-                  }
+                  :width (px 300)}
      [:input {:width (percent 100)
               :height (percent 100)
               :outline :none
@@ -63,12 +59,13 @@
               :padding 0
               :margin 0
               :color :dodgerblue
-;;              :background-color :aliceblue
-              :background-color :#222 ;; :white
+              :background-color :#222
+              :letter-spacing (pt 1)
               :padding-left (px 18)
               :padding-top (px 4)
               :font-size (pt 15)}]
-     ["::-webkit-input-placeholder" {:color :#77c}]]]])
+     ["::-webkit-input-placeholder" {:color :#448}]
+     ["::-moz-placeholder" {:color :#77c}]]]])
 
 ;;-----------------------------------------------------------------------------
 
@@ -79,13 +76,9 @@
                        :bottom (px 70)
                        :left 0
                        :right 0
-;;                       :background-color :#f2f2f2
                        :background-color :#202a33
                        :padding (px 20)}
     [:&.cover {:bottom (px 30)}]
-    [:h2 {:color :dodgerblue
-          :margin 0
-          :font-weight 100}]
     [:div.message-list {:margin-top (px 10)
                         :margin-bottom (px 50)}
      [:div.message {:position :relative
@@ -120,13 +113,12 @@
                  :width (percent 100)
                  :height (percent 100)
                  :background-color :aliceblue
-;;                 :border-top [[(px 1) :solid :#e8e8e8]]
                  :text-align :center}
      [:input {:width (percent 100)
               :height (percent 100)
               :border :none
               :outline :none
-              :background-color :#111 ;; :#222 ;; :white
+              :background-color :#111
               :font-weight 200
               :color :dodgerblue
               :padding-left (px 20)
@@ -134,7 +126,8 @@
               :letter-spacing (pt 1)
               :padding 0
               :font-size (pt 15)}]
-     ["::-webkit-input-placeholder" {:color :#448}]]]])
+     ["::-webkit-input-placeholder" {:color :#448}]
+     ["::-moz-placeholder" {:color :#77c}]]]])
 
 (def status-bar
   [[:section#status {:position :fixed
@@ -156,8 +149,7 @@
                    :right (px 15)
                    :margin 0}
      [:button {:margin 0
-               :cursor :pointer}]]]
-   ])
+               :cursor :pointer}]]]])
 
 (defstyles screen
   globals
