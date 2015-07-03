@@ -116,13 +116,13 @@
 ;;-----------------------------------------------------------------------------
 
 (defn message-component
-  [{:keys [id handle message ts] :as data} owner]
+  [{:keys [id handle message ts rel] :as data} owner]
   (om/component
    (html
     [:div.message {:id (str id)}
      [:div.handle handle]
      [:div.text message]
-     [:div.date (datef ts)]])))
+     [:div.date (if rel rel (datef ts))]])))
 
 (defn message-log-component
   [data owner]
@@ -245,6 +245,13 @@
 ;; Bootstrap
 ;;-----------------------------------------------------------------------------
 
+(defn relative-time-loop
+  [state]
+  (go (loop []
+        (<! (async/timeout (* 1000 30)))
+        (om/transact! state :queue  (fn [q] (mapv #(assoc % :rel (datef (:ts %))) q)))
+        (recur))))
+
 (defn mount-root
   [state event-ch socket]
   (let [options {:target (. js/document (getElementById "mount"))
@@ -261,6 +268,7 @@
   (println "Welcome to the Cipher Web Client")
   (pchan (partial event-fn (om/root-cursor state) event-ch socket) event-ch)
   (mount-root state event-ch socket)
-  (socket/open! socket))
+  (socket/open! socket)
+  (relative-time-loop (om/root-cursor state)))
 
 (set! (.-onload js/window) main)

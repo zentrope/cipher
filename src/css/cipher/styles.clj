@@ -82,7 +82,7 @@
                        :padding-left (px 20)
                        :padding-right (px 20)}
     [:&.cover {:bottom (px 30)}]
-    [:div.message-list {:padding-bottom (px 4)}
+    [:div.message-list {:padding-bottom (px 4) :padding-top (px 4)}
      [:div.message {:position :relative :margin-bottom (px 10)}
       [:div.handle {:position :absolute
                     :top (px 7)
