@@ -94,6 +94,7 @@
 ;; [:client/new-name "string"
 ;; [:client/message "string"
 ;; [:client/withdraw nil
+;; [:client/ping]
 
 (defmulti on-msg!
   (fn [stream [topic data]]
@@ -102,6 +103,10 @@
 (defmethod on-msg! :default
   [stream [topic data :as msg]]
   (log/warn "Unhandled -> " (pr-str msg)))
+
+(defmethod on-msg! :client/ping
+  [stream [topic data :as msg]]
+  (stream/put! stream (pr-str [:server/pong])))
 
 (defmethod on-msg! :client/new-name
   [stream [topic data :as msg]]

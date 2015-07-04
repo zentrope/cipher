@@ -85,14 +85,14 @@
      [cider/cider-nrepl "0.9.1" :exclusions [org.clojure/tools.reader]]
      [lein-garden "0.2.7-SNAPSHOT" :exclusions
       [org.apache.commons/commons-compress]]
-     [lein-figwheel "0.3.5" :exclusions [org.clojure/tools.namespace
+     [lein-figwheel "0.3.7" :exclusions [org.clojure/tools.namespace
                                          org.clojure/clojure
                                          org.codehaus.plexus/plexus-utils]]]
 
     :dependencies
     [[org.clojure/tools.nrepl "0.2.10"] ;; override lein
      [org.clojure/clojurescript "0.0-3308"]
-     [figwheel "0.3.5"]
+     [figwheel "0.3.7"]
      [org.omcljs/om "0.8.8"]
      [sablono "0.3.4"]
      [garden "1.2.5"]]}})
