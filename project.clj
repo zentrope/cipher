@@ -1,4 +1,4 @@
-(defproject com.zentrope/cipher "1"
+(defproject com.zentrope/cipher "0.9.0"
 
   :description
   "Web client/server for anonymous chat."
@@ -93,6 +93,6 @@
     [[org.clojure/tools.nrepl "0.2.10"] ;; override lein
      [org.clojure/clojurescript "0.0-3308"]
      [figwheel "0.3.7"]
-     [org.omcljs/om "0.8.8"]
+     [org.omcljs/om "0.9.0"]
      [sablono "0.3.4"]
      [garden "1.2.5"]]}})

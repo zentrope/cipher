@@ -13,3 +13,4 @@ pom.xml.asc
 /resources/public/main.css
 /resources/public/main.js
 /resources/public/out/
+*.log
