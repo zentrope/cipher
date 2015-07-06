@@ -212,6 +212,7 @@
   (log/info "Welcome to the Cipher App")
   (let [lock (promise)
         routes (gen-routes)
-        httpd (http/start-server #(route! routes %) {:port 2112})]
+        addr (java.net.InetSocketAddress. "127.0.0.1" 2112)
+        httpd (http/start-server #(route! routes %) {:socket-address addr})]
     (log/info "Server running on port 2112.")
     (deref lock)))

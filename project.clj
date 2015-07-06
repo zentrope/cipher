@@ -1,4 +1,4 @@
-(defproject com.zentrope/cipher "0.9.0"
+(defproject com.zentrope/cipher "0.9.1-SNAPSHOT"
 
   :description
   "Web client/server for anonymous chat."
