@@ -1,6 +1,7 @@
 (ns cipher.main
   (:require
    [aleph.http :as http]
+   [byte-streams :as bs]
    [clojure.core.async :as async]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
@@ -91,9 +92,9 @@
   @(stream/put! stream (pr-str [:server/token token])))
 
 ;; API
-;; [:client/new-name "string"
-;; [:client/message "string"
-;; [:client/withdraw nil
+;; [:client/new-name "string"]
+;; [:client/message "string"]
+;; [:client/withdraw nil]
 ;; [:client/ping]
 
 (defmulti on-msg!
@@ -169,9 +170,15 @@
 (defn- resources
   [req]
   (letfn [(good-response [rsrc path]
-            {:status 200
-             :body (slurp rsrc)
-             :headers {"content-type" (mime-for path)}})]
+            (let [stream (stream/stream)]
+              (async/thread
+                (doseq [b (bs/to-byte-buffers rsrc {:chunk-size 2048})]
+                  (stream/put! stream b))
+                (Thread/sleep 100)
+                (stream/close! stream))
+              {:status 200
+               :body stream
+               :headers {"content-type" (mime-for path)}}))]
    (let [url (io/resource (.replaceAll (str "public/" (:uri req)) "//" "/"))]
      (if (.startsWith (str url) "file")
        (let [doc (io/file url)]
@@ -179,7 +186,7 @@
            (good-response doc (.getPath doc))
            (not-found req)))
        (if (and url (not (jar-dir? url)))
-         (good-response url (str url))
+         (good-response (io/input-stream url) (str url))
          (not-found req))))))
 
 ;;-----------------------------------------------------------------------------

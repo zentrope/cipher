@@ -1,4 +1,4 @@
-(defproject com.zentrope/cipher "0.9.1-SNAPSHOT"
+(defproject com.zentrope/cipher "0.9.1"
 
   :description
   "Web client/server for anonymous chat."
@@ -68,7 +68,7 @@
              :compiler {:output-to "resources/public/main.js"
                         :main cipher.main
                         :pretty-print true
-                        :optimizations :whitespace}}]}
+                        :optimizations :advanced}}]}
 
   :figwheel {:http-server-root "public"
              :server-port 3449
