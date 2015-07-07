@@ -170,14 +170,9 @@
 (defn- resources
   [req]
   (letfn [(good-response [rsrc path]
-            (let [stream (stream/stream)]
-              (async/thread
-                (doseq [b (bs/to-byte-buffers rsrc {:chunk-size 2048})]
-                  @(stream/put! stream b))
-                (stream/close! stream))
-              {:status 200
-               :body stream
-               :headers {"content-type" (mime-for path)}}))]
+            {:status 200
+             :body rsrc
+             :headers {"content-type" (mime-for path)}})]
    (let [url (io/resource (.replaceAll (str "public/" (:uri req)) "//" "/"))]
      (if (.startsWith (str url) "file")
        (let [doc (io/file url)]
