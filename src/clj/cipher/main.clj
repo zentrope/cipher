@@ -173,8 +173,7 @@
             (let [stream (stream/stream)]
               (async/thread
                 (doseq [b (bs/to-byte-buffers rsrc {:chunk-size 2048})]
-                  (stream/put! stream b))
-                (Thread/sleep 100)
+                  @(stream/put! stream b))
                 (stream/close! stream))
               {:status 200
                :body stream
