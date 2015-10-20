@@ -1,4 +1,4 @@
-(defproject com.zentrope/cipher "0.9.2-SNAPSHOT"
+(defproject com.zentrope/cipher "0.9.2"
 
   :description
   "Web client/server for anonymous chat."
@@ -14,7 +14,7 @@
    [org.clojure/core.async "0.1.346.0-17112a-alpha"]
    [org.clojure/tools.logging "0.3.1"]
    [ch.qos.logback/logback-classic "1.1.3"]
-   [aleph "0.4.1-alpha1"]
+   [aleph "0.4.1-alpha3"]
 
    ;; Override core.async deps to shut off warnings.
    [org.clojure/core.cache "0.6.4"]
@@ -35,7 +35,8 @@
   :auto-clean false
 
   :aliases
-  {"server"  ["trampoline" "run"]
+  {"updates" ["ancient" ":all" ":check-clojure" ":plugins" ":allow-qualified"]
+   "server"  ["trampoline" "run"]
    "client"  ["trampoline" "figwheel" "dev"]
    "css"     ["trampoline" "garden" "auto"]
    "uberjar" ["do" "clean" ["cljsbuild" "once" "release"]
@@ -81,18 +82,18 @@
    :dev
    {:plugins
     [[lein-ancient "0.6.7"]
-     [lein-cljsbuild "1.0.6"]
+     [lein-cljsbuild "1.1.0"]
      [cider/cider-nrepl "0.9.1" :exclusions [org.clojure/tools.reader]]
      [lein-garden "0.2.7-SNAPSHOT" :exclusions
       [org.apache.commons/commons-compress]]
-     [lein-figwheel "0.3.7" :exclusions [org.clojure/tools.namespace
+     [lein-figwheel "0.4.1" :exclusions [org.clojure/tools.namespace
                                          org.clojure/clojure
                                          org.codehaus.plexus/plexus-utils]]]
 
     :dependencies
-    [[org.clojure/tools.nrepl "0.2.10"] ;; override lein
-     [org.clojure/clojurescript "0.0-3308"]
-     [figwheel "0.3.7"]
+    [[org.clojure/tools.nrepl "0.2.11"] ;; override lein
+     [org.clojure/clojurescript "1.7.145"]
+     [figwheel "0.4.1"]
      [org.omcljs/om "0.9.0"]
-     [sablono "0.3.4"]
+     [sablono "0.3.6"]
      [garden "1.2.5"]]}})
