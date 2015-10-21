@@ -208,6 +208,11 @@
 ;; Bootstrap
 ;;-----------------------------------------------------------------------------
 
+(defn- hook-shutdown!
+  [^java.lang.Runnable f]
+  (doto (Runtime/getRuntime)
+    (.addShutdownHook (Thread. f))))
+
 (defn -main
   [& args]
   (log/info "Welcome to the Cipher App")
@@ -215,5 +220,10 @@
         routes (gen-routes)
         addr (java.net.InetSocketAddress. "127.0.0.1" 2112)
         httpd (http/start-server #(route! routes %) {:socket-address addr})]
+    (hook-shutdown! #(do (log/info "Shutting down server.")
+                         (.close httpd)
+                         (deliver lock :release)))
     (log/info "Server running on port 2112.")
-    (deref lock)))
+    (deref lock)
+    (log/info "Terminated.")
+    (System/exit 0)))

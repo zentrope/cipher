@@ -42,7 +42,7 @@
 
 (defn event-fn
   [state event-ch socket [topic data :as msg]]
-  ;; (println "recv>" (pr-str msg))
+  (println "recv>" (pr-str msg))
   (case topic
 
     :client/handle
